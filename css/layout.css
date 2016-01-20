@@ -1,0 +1,22 @@
+body {
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	line-height: 1.9em;
+	font-size: 13px;
+	color: #444;
+	background: #eee;
+	text-align: center;
+	}
+
+#game {
+	display: block;
+    width: 94%;
+    max-width: 80em;
+    text-align: center;
+    margin: 2em auto;
+	background: #fff;
+    }
+
+h1 {
+	font-size: 2.4em;
+	line-height: 1.2em;
+	}
