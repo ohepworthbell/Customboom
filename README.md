@@ -31,6 +31,7 @@ It's a simple game of catch. A single ball will drop at a time, and a player wil
 ### Possible future additions
 
 * Background graphic for the game (retro - possible animation in future? Would this cause frame-rate issues?)
+* Extra lives occasionally fall, same time as ball but slower so they can be caught
 * Add in table-top graphic (with width calculation to edge of play)
 * Ability to add sounds
 * Improve external customisability - calculate can size from image, rather than pre-set?
