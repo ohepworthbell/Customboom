@@ -6,7 +6,7 @@ This is a basic, customisable, vanilla-JavaScript version of the retro Kaboom! g
 
 It's a simple game of catch. A single ball will drop at a time, and a player will move a tin can back and forth to catch the ball. Each catch will increase the score, and each miss will lose a life until all lives are lost. The game is written in JavaScript and the HTML5 <canvas> tag; is intended to be very basic and heavily customisable; and work on IE9+ and all versions of Edge, Chrome, Firefox and Safari.
 
-[View demo](http://ohepworthbell.github.io/customboom/)
+[View demo](http://ohepworthbell.github.io/projects/custom-boom/)
 
 
 ### Current features
