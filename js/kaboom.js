@@ -12,56 +12,56 @@
  *	and the script will simply rescale the playable area to accomodate.
  */
 var edges = 200,
-	tabletop = 140;
+	tabletop = 130;
 
 /* set up canvas */
 var canvas = document.getElementById('game');
 var ctx = canvas.getContext('2d');
 
 /* some global variables */
-var raf, 												//  Request animation frame
-	i, 													//  General counter
-	move, 												//  Used to get mouse/finger positions
-	touchobj,											//  Used for calculating finger position
-	relw, 												//  Find canvas relative width (for responsive calculations)
-	relmove,											//  Convert positions into responsive positions
-	tinimg,												//  Load tin image
-	start=0,											//  Detect whether the game has started
-	speed=10,											//  Default speed (acceleration/a)
-	rightbound = canvas.width-edges, 					//  Max play boundry to left of canvas
-	platform = canvas.height-tabletop,					//  Max play boundry to right of canvas
-	life=3,												//  Lives remaining (can be set to any value)
-	score=0,											//  Current score
-	checkpoint=0,										//	Used to track score relative checkscore, for speeding up acceleration
-	checkscore=5,										//	How many points between between acceleration boosts
-	scorebox=document.getElementById('score');			//  Simple 'Score' box
-	lifebox=document.getElementById('lives');			//  Simple 'Lives Remaining' box
+var raf, 											              		  //  Request animation frame
+	i, 												                		  //  General counter
+	move, 											              		  //  Used to get mouse/finger positions
+	touchobj,										              		  //  Used for calculating finger position
+	relw, 											              		  //  Find canvas relative width (for responsive calculations)
+	relmove,										              		  //  Convert positions into responsive positions
+	tinimg,											              		  //  Load tin image
+	start=0,										              		  //  Detect whether the game has started
+	speed=8,										              		  //  Default speed (acceleration/a)
+	rightbound = canvas.width-edges, 				  		  //  Max play boundry to left of canvas
+	platform = canvas.height-tabletop,						  //  Max play boundry to right of canvas
+	life=3,											              		  //  Lives remaining (can be set to any value)
+	score=0,										              		  //  Current score
+	checkpoint=0,									            		  //	Used to track score relative checkscore, for speeding up acceleration
+	checkscore=5,									            		  //	How many points between between acceleration boosts
+	audit=document.getElementById('gametrail'),		  //  Simple box to record data visibly in browser
+  pixelSize=5;                                    //  Size of pixels - basically a grid. Should ideally match up with image pixelation!
 
 
-/* Generate a 'tomato' */
-var tomato = {
+/* generate ball image */
+var ballImg = document.createElement('img');
+
+/* Generate the ball (proper) */
+var ball = {
 	/*	Generate a random position between the pre-defined boundaries */
-	x: edges + parseInt((rightbound-edges)*Math.random()),
+	x: edges + (rightbound-edges)*Math.random(),
 	y: -500,
+  ny: -500,
 	a: speed,
-	radius: 25,
 	opacity: 1,
-	color: '#ec3e31',
-	draw: function() {
-		ctx.beginPath();
-		ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, true);
-		ctx.closePath();
-		ctx.fillStyle = this.color;
-		ctx.fill();
+  draw: function() {
+		ctx.drawImage(ballImg,this.x-25,this.ny-50,50,50);
 	}
 }
+
+ballImg.src = '.\/img\/ball.png';
 
 
 /* generate tin image */
 var tinimg = document.createElement('img');
 
 tinimg.addEventListener('load', function() {
-	ctx.drawImage(tinimg,((canvas.width-40)/2),platform-40,80,80);
+	ctx.drawImage(tinimg,((canvas.width-50)/2),platform-50,100,100);
 }, false);
 
 tinimg.src = '.\/img\/tin.png';
@@ -73,37 +73,8 @@ var tin =  {
 	y: platform,
 
 	draw: function() {
-		ctx.drawImage(tinimg,this.x-40,this.y-40,80,80);
+		ctx.drawImage(tinimg,this.x-50,this.y-50,100,100);
 	}
-}
-
-
-/*	For every time a life is lost
- */
-function lifeLost(life) {
-	if(life==1) {
-		lifebox.innerHTML = 'You lost a life! You have '+life+' life remaining';
-
-		reset();
-	}
-	else if(life<1) {
-		lifebox.innerHTML = '<span class=\'red\'>GAME OVER<\/span>';
-
-		tomato.color = 'transparent';
-		tomato.a = 0;
-	}
-	else {
-		lifebox.innerHTML = 'You lost a life! You have '+life+' lives remaining';
-
-		reset();
-	}
-}
-
-
-/*	Function to increase scores
- */
-function addScore(score) {
-	scorebox.innerHTML = 'Score: '+score;
 }
 
 
@@ -111,27 +82,28 @@ function addScore(score) {
  *	of the screen and re-calculated a random x-position. Admittedly poor workaround
  */
 function reset() {
-	tomato.y = -500;
-	tomato.x = edges + parseInt((rightbound-edges)*Math.random());
+	ball.y = -500;
+  ball.ny = -500;
+	ball.x = edges + parseInt((rightbound-edges)*Math.random());
 	}
 
 
 function draw() {
 	ctx.clearRect(0,0, canvas.width, canvas.height);
 
-	/* Only check this function when the tomato gets to the correct height */
-	if(tomato.y>(platform-40) && tomato.y<(platform+10)) {
+	/* Only check this function when the ball gets to the correct height */
+	if(ball.y>(platform-30) && ball.y<(platform+(15+pixelSize))) {
 
-		/* now check the position of the tomato relative to the tin (with a leeway of +/- 25px) */
-		if(tomato.x<relmove+25 && tomato.x>relmove-25) {
+		/* now check the position of the ball relative to the tin (with a leeway of +/- 25px) */
+		if(ball.x<relmove+(25+pixelSize) && ball.x>relmove-(25+pixelSize)) {
 
 			/* add up the score */
 			score++;
-			addScore(score);
+			audit.innerHTML = '<p>Caught! Your score is now '+score+'<\/p>';
 
 			/* test to see if there needs to be an acceleration boost */
 			if(score==(checkpoint+checkscore)) {
-				tomato.a++;
+				ball.a++;
 				checkpoint=score;
 			}
 
@@ -139,24 +111,41 @@ function draw() {
 		}
 	}
 
-	/* Check tomato hasn't reached end of canvas, reset animation if it has.
-	 * When a tomato reaches the bottom, you also lose a point.
+	/* Check ball hasn't reached end of canvas, reset animation if it has.
+	 * When a ball reaches the bottom, you also lose a point.
 	 */
-	if (tomato.y > (canvas.height+20)) {
+	if (ball.y > (canvas.height+20)) {
 		/* lose that life, sucka! */
 		life--;
-		lifeLost(life);
 
 		/* But to make the game fair, let's slow things back down */
-		tomato.a=speed
+		ball.a=speed
+
+		if(life==1) {
+			audit.innerHTML = '<p>You lost a life! You have '+life+' life remaining<\/p>';
+
+			reset();
+		}
+		else if(life<1) {
+			audit.innerHTML = '<p>GAME OVER<\/p>';
+
+			ball.color = 'transparent';
+			ball.a = 0;
+		}
+		else {
+			audit.innerHTML = '<p>You lost a life! You have '+life+' lives remaining<\/p>';
+
+			reset();
+		}
 	}
 
 	/* generate content */
-	tomato.draw();
+	ball.draw();
 	tin.draw();
 
 	/* get next animation step */
-	tomato.y += tomato.a;
+	ball.y += ball.a;
+  ball.ny = pixelSize*Math.floor(ball.y/pixelSize);
 
 	raf = window.requestAnimationFrame(draw);
 }
@@ -194,7 +183,7 @@ function moveTin(move) {
 	}
 
 	/* make the tin move */
-	tin.x = relmove;
+	tin.x = pixelSize * Math.floor(relmove/pixelSize);
 }
 
 
@@ -206,6 +195,9 @@ canvas.addEventListener('click', function(e){
 
 		/* Hide the cursor for the game (for now - will add it back in for menu options) */
 		canvas.style.cursor = 'none';
+
+		/* Quickly check score and lives are correctly set */
+		audit.innerHTML += '<p>You current score is '+score+'. You have '+life+' lives.<\/p>';
 	}
 });
 
@@ -218,9 +210,12 @@ canvas.addEventListener('touchstart', function(e){
 
 		/* Hide the cursor for the game (for now - will add it back in for menu options) */
 		canvas.style.cursor = 'none';
+
+		/* Quickly check score and lives are correctly set */
+		audit.innerHTML += '<p>You current score is '+score+'. You have '+life+' lives.<\/p>';
 	}
 });
 
 /* set up the game */
-tomato.draw();
+ball.draw();
 tin.draw();

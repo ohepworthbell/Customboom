@@ -25,12 +25,11 @@ It's a simple game of catch. A single ball will drop at a time, and a player wil
 * Restart button to re-initialise game on Game Over
 * Overlay 'scores' and 'lives remaining' onto canvas and style them
 * Add points systems for different balls (i.e. gold balls = 5 points, gray balls = lose a point)
-* Replace ball arcs with images/graphics for added customisability of balls
 
 
 ### Possible future additions
 
-* Background graphic for the game (retro - possible animation in future? Would this cause frame-rate issues?)
+* Background animation in future? Would this cause frame-rate issues?
 * Extra lives occasionally fall, same time as ball but slower so they can be caught
 * Add in table-top graphic (with width calculation to edge of play)
 * Ability to add sounds

@@ -7,16 +7,26 @@
 	<meta name="keywords" content="" />
 	<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, shrink-to-fit=no" />
 
-	<link rel="stylesheet" href="./css/layout.css" type="text/css" media="all" />
+	<!-- Favicon Icons -->
+	<link rel="shortcut icon" href="./favicon.ico">
+
+	<link type="text/plain" rel="author" href="./humans.txt" />
+	<link rel="stylesheet" href="./css/common.css" type="text/css" media="all" />
+
+	<!--[if lte IE 8]>
+	<link rel="stylesheet" href="./css/plugins/ie8.css" type="text/css" />
+	<script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
 </head>
 <body>
 
-<h1>Customboom</h1>
+<div class="outer">
+	<h1>Kaboom!</h1>
 
-<canvas id="game" width="1200" height="700"></canvas>
+	<canvas id="game" width="1200" height="700" style="display: block; background: #eee url(img/background.jpg) no-repeat center; background-size: cover; width: 100%; margin: 2em 0;"></canvas>
 
-<div id="lives">You have 3 lives remaining</div>
-<div id="score">Score: 0</div>
+	<div id="gametrail"></div>
+</div>
 
 <script type="text/javascript" src="./js/kaboom.js"></script>
 
