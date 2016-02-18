@@ -235,9 +235,13 @@ document.body.onkeyup = function(e){
    * 13 (return)
    * 80 (p)
    */
-  if(e.keyCode == 32 || e.keyCode == 27 || e.keyCode == 13 || e.keyCode == 80){
-    /* Stop any unintended side-effects, such as spacebars skipping down the page */
+
+  /* Stop spacebars skipping down the page */
+  if (e.keyCode == 32 && e.target == document.body) {
     e.preventDefault();
+  }
+
+  if(e.keyCode == 32 || e.keyCode == 27 || e.keyCode == 13 || e.keyCode == 80){
 
     /* Check to see whether game is paused, then toggle the 'paused' variable */
     if(!paused) {
