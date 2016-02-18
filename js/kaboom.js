@@ -8,15 +8,15 @@
 
 /*	Set the edge width and the tabletop height (from bottom of screen)
  *
- *	NOTE: You can set the width and height of the canvas to whatever you want, as well as the height of the 'tabletop'
+ *	NOTE: You can set the width and height of the canvas to whatever you want, as well as the height of the "tabletop"
  *	and the script will simply rescale the playable area to accomodate.
  */
 var edges = 200,
 	tabletop = 130;
 
 /* set up canvas */
-var canvas = document.getElementById('game');
-var ctx = canvas.getContext('2d');
+var canvas = document.getElementById("game");
+var ctx = canvas.getContext("2d");
 
 /* some global variables */
 var raf, 											              		  //  Request animation frame
@@ -26,20 +26,21 @@ var raf, 											              		  //  Request animation frame
 	relw, 											              		  //  Find canvas relative width (for responsive calculations)
 	relmove,										              		  //  Convert positions into responsive positions
 	tinimg,											              		  //  Load tin image
-	start=0,										              		  //  Detect whether the game has started
-	speed=8,										              		  //  Default speed (acceleration/a)
+	start = 0,										              		//  Detect whether the game has started
+	speed = 8,										              		//  Default speed (acceleration/a)
 	rightbound = canvas.width-edges, 				  		  //  Max play boundry to left of canvas
 	platform = canvas.height-tabletop,						  //  Max play boundry to right of canvas
-	life=3,											              		  //  Lives remaining (can be set to any value)
-	score=0,										              		  //  Current score
-	checkpoint=0,									            		  //	Used to track score relative checkscore, for speeding up acceleration
-	checkscore=5,									            		  //	How many points between between acceleration boosts
-	audit=document.getElementById('gametrail'),		  //  Simple box to record data visibly in browser
-  pixelSize=5;                                    //  Size of pixels - basically a grid. Should ideally match up with image pixelation!
+	life = 3,											              		//  Lives remaining (can be set to any value)
+	score = 0,										              		//  Current score
+	checkpoint = 0,									            		//	Used to track score relative checkscore, for speeding up acceleration
+	checkscore = 5,									            		//	How many points between between acceleration boosts
+	audit=document.getElementById("gametrail"),		  //  Simple box to record data visibly in browser
+  pixelSize = 5,                                  //  Size of pixels - basically a grid. Should ideally match up with image pixelation!
+  paused = false;                                 // State whether the game is paused or not
 
 
 /* generate ball image */
-var ballImg = document.createElement('img');
+var ballImg = document.createElement("img");
 
 /* Generate the ball (proper) */
 var ball = {
@@ -54,20 +55,20 @@ var ball = {
 	}
 }
 
-ballImg.src = '.\/img\/ball.png';
+ballImg.src = ".\/img\/ball.png";
 
 
 /* generate tin image */
-var tinimg = document.createElement('img');
+var tinimg = document.createElement("img");
 
-tinimg.addEventListener('load', function() {
+tinimg.addEventListener("load", function() {
 	ctx.drawImage(tinimg,((canvas.width-50)/2),platform-50,100,100);
 }, false);
 
-tinimg.src = '.\/img\/tin.png';
+tinimg.src = ".\/img\/tin.png";
 
 
-/* Generate the 'catching' tin */
+/* Generate the "catching" tin */
 var tin =  {
 	x: (canvas.width/2),
 	y: platform,
@@ -99,7 +100,7 @@ function draw() {
 
 			/* add up the score */
 			score++;
-			audit.innerHTML = '<p>Caught! Your score is now '+score+'<\/p>';
+			audit.innerHTML = "<p>Caught! Your score is now "+score+"<\/p>";
 
 			/* test to see if there needs to be an acceleration boost */
 			if(score==(checkpoint+checkscore)) {
@@ -111,29 +112,29 @@ function draw() {
 		}
 	}
 
-	/* Check ball hasn't reached end of canvas, reset animation if it has.
+	/* Check ball hasn"t reached end of canvas, reset animation if it has.
 	 * When a ball reaches the bottom, you also lose a point.
 	 */
 	if (ball.y > (canvas.height+20)) {
 		/* lose that life, sucka! */
 		life--;
 
-		/* But to make the game fair, let's slow things back down */
+		/* But to make the game fair, let"s slow things back down */
 		ball.a=speed
 
 		if(life==1) {
-			audit.innerHTML = '<p>You lost a life! You have '+life+' life remaining<\/p>';
+			audit.innerHTML = "<p>You lost a life! You have "+life+" life remaining<\/p>";
 
 			reset();
 		}
 		else if(life<1) {
-			audit.innerHTML = '<p>GAME OVER<\/p>';
+			audit.innerHTML = "<p>GAME OVER<\/p>";
 
-			ball.color = 'transparent';
+			ball.color = "transparent";
 			ball.a = 0;
 		}
 		else {
-			audit.innerHTML = '<p>You lost a life! You have '+life+' lives remaining<\/p>';
+			audit.innerHTML = "<p>You lost a life! You have "+life+" lives remaining<\/p>";
 
 			reset();
 		}
@@ -147,17 +148,19 @@ function draw() {
 	ball.y += ball.a;
   ball.ny = pixelSize*Math.floor(ball.y/pixelSize);
 
-	raf = window.requestAnimationFrame(draw);
+  if(!paused) {
+    raf = window.requestAnimationFrame(draw);
+  }
 }
 
 
 /* get the current mouse/finger position within the canvas */
-canvas.addEventListener('mousemove', function(e){
+canvas.addEventListener("mousemove", function(e){
 	move = e.clientX - canvas.getBoundingClientRect().left;
 	moveTin(move);
 });
 
-canvas.addEventListener('touchmove', function(e){
+canvas.addEventListener("touchmove", function(e){
 	touchobj = e.changedTouches[0];
 	move = touchobj.clientX - canvas.offsetLeft;
 	moveTin(move);
@@ -188,34 +191,63 @@ function moveTin(move) {
 
 
 /* begin the game on mouseover */
-canvas.addEventListener('click', function(e){
+canvas.addEventListener("click", function(e){
 	if(start==0) {
 		start=1;
 		raf = window.requestAnimationFrame(draw);
 
 		/* Hide the cursor for the game (for now - will add it back in for menu options) */
-		canvas.style.cursor = 'none';
+		canvas.style.cursor = "none";
 
 		/* Quickly check score and lives are correctly set */
-		audit.innerHTML += '<p>You current score is '+score+'. You have '+life+' lives.<\/p>';
+		audit.innerHTML += "<p>You current score is "+score+". You have "+life+" lives.<\/p>";
 	}
 });
 
 
 /* Additional start touch-screen devices */
-canvas.addEventListener('touchstart', function(e){
+canvas.addEventListener("touchstart", function(e){
 	if(start==0) {
 		start=1;
 		raf = window.requestAnimationFrame(draw);
 
 		/* Hide the cursor for the game (for now - will add it back in for menu options) */
-		canvas.style.cursor = 'none';
+		canvas.style.cursor = "none";
 
 		/* Quickly check score and lives are correctly set */
-		audit.innerHTML += '<p>You current score is '+score+'. You have '+life+' lives.<\/p>';
+		audit.innerHTML += "<p>You current score is "+score+". You have "+life+" lives.<\/p>";
 	}
 });
 
 /* set up the game */
 ball.draw();
 tin.draw();
+
+
+/* allow the game to be paused or unpaused */
+
+document.body.onkeyup = function(e){
+    /* Check which keys have been pressed, and whether they pause the game:
+     *
+     * 32 (spacebar)
+     * 27 (escape)
+     * 13 (return)
+     * 80 (p)
+     */
+    if(e.keyCode == 32 || e.keyCode == 27 || e.keyCode == 13 || e.keyCode == 80){
+      /* Check to see whether game is paused, then toggle the 'paused' variable */
+      if(!paused) {
+        paused=true;
+        /* Enable cursor again */
+        canvas.style.cursor = "default";
+      }
+
+      /* If the game is already paused, then resume */
+      else {
+        paused=false;
+        /* Hide cursor as game continues */
+        canvas.style.cursor = "none";
+        raf = window.requestAnimationFrame(draw);
+      }
+    }
+}

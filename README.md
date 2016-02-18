@@ -21,7 +21,6 @@ It's a simple game of catch. A single ball will drop at a time, and a player wil
 
 ### Urgent to-do list
 
-* Spacebar to pause/play game
 * Restart button to re-initialise game on Game Over
 * Overlay 'scores' and 'lives remaining' onto canvas and style them
 * Add points systems for different balls (i.e. gold balls = 5 points, gray balls = lose a point)
