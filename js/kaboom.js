@@ -11,33 +11,42 @@
  *  NOTE: You can set the width and height of the canvas to whatever you want, as well as the height of the "tabletop"
  *  and the script will simply rescale the playable area to accomodate.
  */
-var edges = 200,
-  tabletop = 130;
+
+var edges = 50,
+    tabletop = 160;
 
 /* set up canvas */
 var canvas = document.getElementById("customboom");
 var ctx = canvas.getContext("2d");
 
 /* some global variables */
-var raf,                                   //  Request animation frame
-  i,                                       //  General counter
-  move,                                   //  Used to get mouse/finger positions
-  touchobj,                                //  Used for calculating finger position
-  relw,                                   //  Find canvas relative width (for responsive calculations)
-  relmove,                                //  Convert positions into responsive positions
-  tinimg,                                  //  Load tin image
-  start = 0,                                //  Detect whether the game has started
-  speed = 8,                                //  Default speed (acceleration/a)
-  rightbound = canvas.width-edges,               //  Max play boundry to left of canvas
-  platform = canvas.height-tabletop,              //  Max play boundry to right of canvas
-  life = 3,                                  //  Lives remaining (can be set to any value)
-  score = 0,                                //  Current score
-  checkpoint = 0,                            //  Used to track score relative checkscore, for speeding up acceleration
-  checkscore = 5,                            //  How many points between between acceleration boosts
-  showlives=document.getElementById("lives"),        //  Simple box to record lives visibly in browser
-  showscore=document.getElementById("score"),        //  Simple box to record score visibly in browser
-  pixelSize = 5,                  //  Size of pixels - basically a grid. Should ideally match up with image pixelation!
-  paused = false;                 // State whether the game is paused or not
+var raf,                                           //  Request animation frame
+    i,                                             //  General counter
+    move,                                          //  Used to get mouse/finger positions
+    touchobj,                                      //  Used for calculating finger position
+    relw,                                          //  Find canvas relative width (for responsive calculations)
+    relmove,                                       //  Convert positions into responsive positions
+    start = 0,                                     //  Detect whether the game has started
+    speed = 8,                                     //  Default speed (acceleration/a)
+    paused = false,                                //  State whether the game is paused or not
+    rightbound = canvas.width-edges,               //  Max play boundry to left of canvas
+    platform = canvas.height-tabletop,             //  Max play boundry to right of canvas
+    life = 3,                                      //  Lives remaining (can be set to any value)
+    score = 0,                                     //  Current score
+    checkpoint = 0,                                //  Used to track score relative checkscore, for speeding up acceleration
+    checkscore = 5,                                //  How many points between between acceleration boosts
+    showlives=document.getElementById("lives"),    //  Simple box to record lives visibly in browser
+    showscore=document.getElementById("score"),    //  Simple box to record score visibly in browser
+    pixelSize = 5,                                 //  Size of pixels - basically a grid. Should ideally match up with image pixelation!
+    isKeyPressed = false;                          //  Test keypress (to pause games, etc.)
+
+
+/* some script to pixelate an image (for that retro feel) */
+ctx.imageSmoothingEnabled = false;
+ctx.mozImageSmoothingEnabled = false;
+ctx.msImageSmoothingEnabled = false;
+ctx.webkitImageSmoothingEnabled = false;
+
 
 
 /* generate ball image */
@@ -52,7 +61,13 @@ var ball = {
   a: speed,
   opacity: 1,
   draw: function() {
-    ctx.drawImage(ballImg,this.x-25,this.ny-50,50,50);
+    ctx.drawImage(
+      ballImg,
+      this.x-(pixelSize*ballImg.width/2),
+      this.ny-ballImg.height,
+      ballImg.width*pixelSize,
+      ballImg.height*pixelSize
+    );
   }
 }
 
@@ -63,7 +78,13 @@ ballImg.src = ".\/img\/ball.png";
 var tinimg = document.createElement("img");
 
 tinimg.addEventListener("load", function() {
-  ctx.drawImage(tinimg,((canvas.width-50)/2),platform-50,100,100);
+  ctx.drawImage(
+    tinimg,
+    (canvas.width-(pixelSize*tinimg.width/2))/2,
+    platform-(pixelSize*tinimg.height/2),
+    tinimg.width*pixelSize,
+    tinimg.height*pixelSize
+  );
 }, false);
 
 tinimg.src = ".\/img\/tin.png";
@@ -75,7 +96,13 @@ var tin =  {
   y: platform,
 
   draw: function() {
-    ctx.drawImage(tinimg,this.x-50,this.y-50,100,100);
+    ctx.drawImage(
+      tinimg,
+      this.x-(pixelSize*tinimg.width/2),
+      this.y-(pixelSize*tinimg.height/2),
+      tinimg.width*pixelSize,
+      tinimg.height*pixelSize
+    );
   }
 }
 
@@ -94,10 +121,10 @@ function draw() {
   ctx.clearRect(0,0, canvas.width, canvas.height);
 
   /* Only check this function when the ball gets to the correct height */
-  if(ball.y>(platform-30) && ball.y<(platform+(15+pixelSize))) {
+  if(ball.y>(platform-(pixelSize*tinimg.height/1.5)) && ball.y<(platform+pixelSize)) {
 
-    /* now check the position of the ball relative to the tin (with a leeway of +/- 25px) */
-    if(ball.x<relmove+(25+pixelSize) && ball.x>relmove-(25+pixelSize)) {
+    /* now check the position of the ball relative to the tin (with a leeway of +/- 60%) */
+    if(ball.x<relmove+((tinimg.width*pixelSize)/1.666) && ball.x>relmove-((tinimg.width*pixelSize)/1.666)) {
 
       /* add up the score */
       score++;
@@ -150,7 +177,7 @@ function draw() {
   ball.ny = pixelSize*Math.floor(ball.y/pixelSize);
 
   if(!paused) {
-  raf = window.requestAnimationFrame(draw);
+    raf = window.requestAnimationFrame(draw);
   }
 }
 
@@ -187,12 +214,12 @@ function moveTin(move) {
   }
 
   /* make the tin move */
-  tin.x = pixelSize * Math.floor(relmove/pixelSize);
+  tin.x = pixelSize*Math.floor(relmove/pixelSize);
 }
 
 
 /* begin the game on mouseover */
-canvas.addEventListener("click", function(e){
+canvas.addEventListener("click", function(){
   if(start==0) {
     start=1;
     raf = window.requestAnimationFrame(draw);
@@ -207,7 +234,7 @@ canvas.addEventListener("click", function(e){
 
 
 /* Additional start touch-screen devices */
-canvas.addEventListener("touchstart", function(e){
+canvas.addEventListener("touchstart", function(){
   if(start==0) {
     start=1;
     raf = window.requestAnimationFrame(draw);
@@ -235,27 +262,28 @@ document.body.onkeyup = function(e){
    * 13 (return)
    * 80 (p)
    */
+  if(e.keyCode === 32 || e.keyCode === 27 || e.keyCode === 13 || e.keyCode === 80) {
+    isKeyPressed = true;
+  } else {
+    isKeyPressed = false;
+  };
 
-  /* Stop spacebars skipping down the page */
-  if (e.keyCode == 32 && e.target == document.body) {
+  if(isKeyPressed) {
     e.preventDefault();
-  }
-
-  if(e.keyCode == 32 || e.keyCode == 27 || e.keyCode == 13 || e.keyCode == 80){
 
     /* Check to see whether game is paused, then toggle the 'paused' variable */
     if(!paused) {
-    paused=true;
-    /* Enable cursor again */
-    canvas.style.cursor = "default";
+      paused=true;
+      /* Enable cursor again */
+      canvas.style.cursor = "default";
     }
 
     /* If the game is already paused, then resume */
     else {
-    paused=false;
-    /* Hide cursor as game continues */
-    canvas.style.cursor = "none";
-    raf = window.requestAnimationFrame(draw);
+      paused=false;
+      /* Hide cursor as game continues */
+      canvas.style.cursor = "none";
+      raf = window.requestAnimationFrame(draw);
     }
   }
 }
