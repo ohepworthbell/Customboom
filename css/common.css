@@ -8,11 +8,11 @@ body {
 
 .outer {
 	display: block;
-  width: 94%;
-  max-width: 80em;
-  text-align: center;
-  margin: 2em auto;
-  }
+	width: 94%;
+	max-width: 80em;
+	text-align: center;
+	margin: 2em auto;
+	}
 
 h1 {
 	font-size: 2.4em;
